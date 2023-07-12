@@ -7,6 +7,7 @@ from typing import List, Dict, Tuple
 import glob
 import json
 from time import time
+import traceback
 
 
 IGNORE_FILE_NAME = '.cqsignore'
@@ -122,7 +123,7 @@ class ModuleManager:
         result = model.build()
 
         if not result.success:
-            raise ModuleManagerError('Error in model', result.exception)
+            raise ModuleManagerError('Error in model') from result.exception
 
         return result
 
@@ -202,7 +203,7 @@ class ModuleManager:
 
                 data = {
                     'error': error.message,
-                    'stacktrace': error.stacktrace
+                    'stacktrace': ''.join(traceback.format_exception(type(error), error, error.__traceback__))
                 }
 
         return data
@@ -221,12 +222,7 @@ class ModuleManager:
 class ModuleManagerError(Exception):
     '''Error class used to define ModuleManager errors.'''
 
-    def __init__(self, message: str, stacktrace: str=''):
+    def __init__(self, message: str):
         self.message = message
-        self.stacktrace = stacktrace
-
         print('Module manager error: ' + message, file=sys.stderr)
-        if stacktrace:
-            print(stacktrace, file=sys.stderr)
-
         super().__init__(self.message)
