@@ -6,8 +6,9 @@ import sys
 from typing import List, Dict, Tuple
 import glob
 import json
-from time import time
+import time
 import traceback
+import hashlib
 
 
 IGNORE_FILE_NAME = '.cqsignore'
@@ -124,8 +125,14 @@ class ModuleManager:
 
         if not result.success:
             raise ModuleManagerError('Error in model') from result.exception
-
+        result.env["diameter"] = 5
         return result
+
+    def hash_to_integer(self, obj, min = 1000000, max = 9000000):
+        hash_value = hashlib.sha256(repr(obj).encode()).hexdigest()
+        decimal_hash = int(hash_value, 16)
+        mapped_value = decimal_hash % max + min
+        return mapped_value
 
     def get_assembly(self):
         from cadquery import Assembly, Color
@@ -150,6 +157,9 @@ class ModuleManager:
             if alpha:
                 r, g, b = color.toTuple()[:3]
                 color = Color(r, g, b, alpha)
+
+            if not name:
+                name = str(self.hash_to_integer(result.shape))
 
             try:
                 assembly.add(result.shape, color=color, name=name)
@@ -188,9 +198,9 @@ class ModuleManager:
 
         if self.module_name:
             try:
-                start_time = time()
+                start_time = time.perf_counter()
                 model = self.get_json_model()
-                end_time = time()
+                end_time = time.perf_counter()
                 data = {
                     'module_name': self.module_name,
                     'model': model,
