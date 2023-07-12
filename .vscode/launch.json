@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Application",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/cq-server",
+            "args": ["run", "-p", "5000", "~/code/perso/CadQuery/test_cqWarehouse"],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ]
+}
